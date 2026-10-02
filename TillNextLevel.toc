@@ -3,7 +3,7 @@
 ## Notes: Experience bar, session XP/hour and quest XP forecast.
 ## Notes-frFR: Barre d'expérience, XP par heure et prévision des quêtes.
 ## Author: G3nkidan
-## Version: 0.1.2
+## Version: 0.1.3
 ## SavedVariablesPerCharacter: TillNextLevelDB
 
 Model.lua

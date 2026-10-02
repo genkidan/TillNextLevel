@@ -62,7 +62,9 @@ local function ScanQuests()
 end
 
 local function Tooltip()
-    GameTooltip:SetOwner(frame, "ANCHOR_TOP")
+    GameTooltip:SetOwner(frame, "ANCHOR_NONE")
+    GameTooltip:ClearAllPoints()
+    GameTooltip:SetPoint("TOP", frame, "BOTTOM", 0, -14)
     GameTooltip:ClearLines()
     GameTooltip:AddLine("Till Next Level", 0.35, 0.81, 1)
     local maximum, xp = UnitXPMax("player"), UnitXP("player")

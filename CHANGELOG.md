@@ -1,5 +1,9 @@
 # Historique
 
+## 0.1.3
+
+- Infobulle positionnée sous la barre avec un espace de 14 pour laisser les informations visibles.
+
 ## 0.1.2
 
 - Fond transparent : suppression du fond du panneau, de la piste sombre et de l'accent supérieur ; aucun cadre ni contour.
