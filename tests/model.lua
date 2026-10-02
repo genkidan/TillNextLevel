@@ -1,0 +1,21 @@
+local addon = {}
+assert(loadfile("Model.lua"))("TillNextLevel", addon)
+local session = addon.NewSession(0, 10, 900, 1000)
+assert(addon.Observe(session, 10, 950, 1000))
+assert(session.gained == 50)
+addon.Observe(session, 10, 20, 1000) -- XP reset before level event
+assert(session.gained == 50 and session.xp == 950)
+assert(addon.Observe(session, 11, 20, 1200))
+assert(session.gained == 120)
+assert(addon.Observe(session, 11, 20, 1200))
+assert(session.gained == 120) -- no duplicate counting
+assert(addon.Rate(session, 60) == 7200)
+assert(addon.Rate(session, 0) == 0)
+assert(addon.Observe(session, 13, 10, 1500) == false)
+local current, ready, ongoing = addon.Forecast(800, 1000, 150, 300)
+assert(math.abs(current - 0.8) < 0.00001)
+assert(math.abs(ready - 0.15) < 0.00001)
+assert(math.abs(ongoing - 0.05) < 0.00001)
+current, ready, ongoing = addon.Forecast(100, 0, 500, 1000)
+assert(current == 0 and ready == 0 and ongoing == 0)
+print("model: OK")
