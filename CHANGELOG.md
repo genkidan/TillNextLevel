@@ -1,5 +1,11 @@
 # Historique
 
+## 0.1.5
+
+- Traductions automatiques selon le client : français, anglais, allemand, espagnol (Europe et Amérique latine), italien, portugais brésilien, russe, coréen et chinois simplifié/traditionnel.
+- Traduction des libellés, de l'infobulle et de l'aide ; séparateurs des nombres adaptés à la langue.
+- `/tnl scale` accepte aussi une virgule décimale.
+
 ## 0.1.4
 
 - Affichage en haut de l'XP restante avant le prochain niveau, en valeur et en pourcentage, à côté de la progression actuelle.

@@ -3,18 +3,18 @@ local frame, session, db
 local quests = { ready = 0, ongoing = 0, unknown = 0, rows = {} }
 local questDirty, questElapsed, elapsed = true, 0, 0
 local WHITE = "Interface\\Buttons\\WHITE8X8"
-local fr = GetLocale() == "frFR"
-local function T(french, english) return fr and french or english end
+local L = addon.L
 local function number(value)
     local s = tostring(math.floor(value + 0.5))
-    local formatted = s:reverse():gsub("(%d%d%d)", "%1 "):reverse():gsub("^ ", "")
+    local formatted = s:reverse():gsub("(%d%d%d)", "%1" .. addon.thousandsSeparator):reverse()
+    if formatted:sub(1, 1) == addon.thousandsSeparator then formatted = formatted:sub(2) end
     return formatted
 end
 local function duration(seconds)
     if not seconds or seconds == math.huge then return "--" end
     local minutes = math.ceil(seconds / 60)
-    if minutes < 60 then return minutes .. " min" end
-    return string.format("%dh %02d", math.floor(minutes / 60), minutes % 60)
+    if minutes < 60 then return string.format(L.minutes, minutes) end
+    return string.format(L.hours, math.floor(minutes / 60), minutes % 60)
 end
 local function message(text)
     DEFAULT_CHAT_FRAME:AddMessage("|cff59cfffTill Next Level|r : " .. text)
@@ -54,7 +54,7 @@ local function ScanQuests()
                     quests.ongoing = quests.ongoing + reward
                 end
                 quests.rows[#quests.rows + 1] = {
-                    title = info.title or ("Quest " .. id), xp = reward, complete = complete,
+                    title = info.title or string.format(L.quest, id), xp = reward, complete = complete,
                 }
             end
         end
@@ -69,25 +69,25 @@ local function Tooltip()
     GameTooltip:AddLine("Till Next Level", 0.35, 0.81, 1)
     local maximum, xp = UnitXPMax("player"), UnitXP("player")
     local rate = addon.Rate(session, GetTime())
-    GameTooltip:AddDoubleLine(T("XP restante", "XP remaining"), number(math.max(0, maximum - xp)), 1, 1, 1, 1, 1, 1)
-    GameTooltip:AddDoubleLine(T("XP gagnée cette session", "Session XP gained"), number(session.gained))
-    GameTooltip:AddDoubleLine(T("Durée de la session", "Session duration"), duration(GetTime() - session.started))
-    GameTooltip:AddDoubleLine(T("XP / heure", "XP / hour"), number(rate))
-    GameTooltip:AddDoubleLine(T("Temps avant le niveau suivant", "Time to next level"), rate > 0 and duration(math.max(0, maximum - xp) / rate * 3600) or "--")
-    GameTooltip:AddDoubleLine(T("Après les quêtes terminées", "After completed quests"), rate > 0 and duration(math.max(0, maximum - xp - quests.ready) / rate * 3600) or "--")
-    GameTooltip:AddDoubleLine(T("Bonus de repos disponible", "Rested XP available"), number(GetXPExhaustion() or 0))
+    GameTooltip:AddDoubleLine(L.remaining, number(math.max(0, maximum - xp)), 1, 1, 1, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L.gained, number(session.gained))
+    GameTooltip:AddDoubleLine(L.sessionDuration, duration(GetTime() - session.started))
+    GameTooltip:AddDoubleLine(L.rate, number(rate))
+    GameTooltip:AddDoubleLine(L.nextTime, rate > 0 and duration(math.max(0, maximum - xp) / rate * 3600) or "--")
+    GameTooltip:AddDoubleLine(L.afterQuests, rate > 0 and duration(math.max(0, maximum - xp - quests.ready) / rate * 3600) or "--")
+    GameTooltip:AddDoubleLine(L.rested, number(GetXPExhaustion() or 0))
     GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(T("Vert : prêtes à rendre · Or : en cours", "Green: ready to turn in · Gold: in progress"), 0.8, 0.8, 0.8)
+    GameTooltip:AddLine(L.legend, 0.8, 0.8, 0.8)
     for _, quest in ipairs(quests.rows) do
         local r, g, b = 1, 0.76, 0.3
         if quest.complete then r, g, b = 0.3, 0.9, 0.55 end
-        GameTooltip:AddDoubleLine(quest.title, quest.xp and (number(quest.xp) .. " XP") or "?", r, g, b, r, g, b)
+        GameTooltip:AddDoubleLine(quest.title, quest.xp and (number(quest.xp) .. " " .. L.xp) or "?", r, g, b, r, g, b)
     end
     if quests.unknown > 0 then
-        GameTooltip:AddLine(T("XP indisponible pour certaines quêtes : total partiel.", "Some quest rewards are unavailable: partial total."), 1, 0.6, 0.3, true)
+        GameTooltip:AddLine(L.partial, 1, 0.6, 0.3, true)
     end
     GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(db.locked and T("/tnl unlock : déverrouiller · /tnl : commandes", "/tnl unlock: unlock · /tnl: commands") or T("Glisser : déplacer · /tnl lock : verrouiller", "Drag: move · /tnl lock: lock"), 0.65, 0.65, 0.65)
+    GameTooltip:AddLine(db.locked and L.unlockHint or L.dragHint, 0.65, 0.65, 0.65)
     GameTooltip:Show()
 end
 
@@ -114,13 +114,13 @@ local function Refresh()
     segment(frame.ready, current, ready)
     segment(frame.ongoing, current + ready, ongoing)
     if capped then
-        frame.title:SetText(string.format(T("Niveau %d · XP désactivée", "Level %d · XP disabled"), level))
+        frame.title:SetText(string.format(L.capped, level))
         frame.stats:SetText("Till Next Level")
     else
         local remaining = math.max(0, maximum - xp)
-        frame.title:SetText(string.format(T("Niv. %d   %s / %s XP   (%.1f%%)   ·   Restant : %s XP (%.1f%%)", "Lv. %d   %s / %s XP   (%.1f%%)   ·   Remaining: %s XP (%.1f%%)"), level, number(xp), number(maximum), current * 100, number(remaining), (1 - current) * 100))
+        frame.title:SetText(string.format(L.title, level, number(xp), number(maximum), addon.LocalizeDecimals(string.format("%.1f", current * 100)), number(remaining), addon.LocalizeDecimals(string.format("%.1f", (1 - current) * 100))))
         local rate = addon.Rate(session, GetTime())
-        frame.stats:SetText(string.format(T("%s XP / h   ·   Prochain niveau : %s   ·   Prêtes : +%s   ·   En cours : +%s%s", "%s XP / h   ·   Next level: %s   ·   Ready: +%s   ·   In progress: +%s%s"), number(rate), rate > 0 and duration((maximum - xp) / rate * 3600) or "--", number(quests.ready), number(quests.ongoing), quests.unknown > 0 and "   (?)" or ""))
+        frame.stats:SetText(string.format(L.stats, number(rate), rate > 0 and duration((maximum - xp) / rate * 3600) or "--", number(quests.ready), number(quests.ongoing), quests.unknown > 0 and "   (?)" or ""))
     end
     frame:SetShown(not db.hidden)
     if GameTooltip:IsOwned(frame) then Tooltip() end
@@ -189,18 +189,18 @@ SLASH_TILLNEXTLEVEL2 = "/tillnextlevel"
 SlashCmdList.TILLNEXTLEVEL = function(input)
     if not db then return end
     local command, argument = input:lower():match("^%s*(%S*)%s*(.-)%s*$")
-    if command == "reset" then ResetSession(); message(T("Session réinitialisée.", "Session reset."))
+    if command == "reset" then ResetSession(); message(L.reset)
     elseif command == "show" then db.hidden = false
     elseif command == "hide" then db.hidden = true
-    elseif command == "lock" then db.locked = true; message(T("Position verrouillée.", "Position locked."))
-    elseif command == "unlock" then db.locked = false; message(T("Glisser pour déplacer.", "Drag to move."))
+    elseif command == "lock" then db.locked = true; message(L.locked)
+    elseif command == "unlock" then db.locked = false; message(L.move)
     elseif command == "center" then db.x, db.y = 0, -180; Position()
     elseif command == "scale" then
-        local scale = tonumber(argument)
+        local scale = tonumber((argument:gsub(",", ".")))
         if scale and scale >= 0.5 and scale <= 2 then
             db.scale = scale; frame:SetScale(scale); Position()
-        else message(T("Utilisation : /tnl scale 0.5 à 2", "Usage: /tnl scale 0.5 to 2")) end
-    else message("/tnl show | hide | reset | lock | unlock | center | scale 1") end
+        else message(L.scaleUsage) end
+    else message(L.help) end
     Refresh()
 end
 

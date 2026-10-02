@@ -25,7 +25,7 @@ end
 UIParent, GameTooltip = widget(), widget()
 DEFAULT_CHAT_FRAME = { AddMessage = function() end }
 SlashCmdList = {}
-function GetLocale() return "frFR" end
+function GetLocale() return arg[1] or "frFR" end
 function GetTime() return clock end
 function UnitXP() return xp end
 function UnitXPMax() return maximum end
@@ -49,6 +49,7 @@ C_QuestLog = {
 function GetQuestLogRewardXP(id)
     if id == 10 then return 150 elseif id == 20 then return 300 end
 end
+assert(loadfile("Localization.lua"))("TillNextLevel", addon)
 assert(loadfile("Model.lua"))("TillNextLevel", addon)
 assert(loadfile("TillNextLevel.lua"))("TillNextLevel", addon)
 local events = frames[1]
@@ -56,23 +57,24 @@ local function fire(event, ...) events.scripts.OnEvent(events, event, ...) end
 fire("ADDON_LOADED", "TillNextLevel")
 fire("PLAYER_LOGIN")
 local frame = TillNextLevelFrame
-assert(frame.title.text:find("800 / 1 000", 1, true))
-assert(frame.title.text:find("Restant : 200 XP (20.0%)", 1, true))
+assert(frame.title.text:find("800 / 1" .. addon.thousandsSeparator .. "000", 1, true))
+assert(frame.title.text:find("20" .. addon.decimalSeparator .. "0%", 1, true))
 assert(frame.stats.text:find("+150", 1, true))
 assert(frame.stats.text:find("+300", 1, true))
 assert(frame.stats.text:find("(?)", 1, true))
 clock, xp = 60, 900
 fire("PLAYER_XP_UPDATE", "player")
-assert(frame.stats.text:find("6 000 XP / h", 1, true))
+assert(frame.stats.text:find("6" .. addon.thousandsSeparator .. "000", 1, true))
 level, xp, maximum = 11, 50, 1200
 fire("PLAYER_LEVEL_UP", 11)
-assert(frame.stats.text:find("15 000 XP / h", 1, true))
+assert(frame.stats.text:find("15" .. addon.thousandsSeparator .. "000", 1, true))
 SlashCmdList.TILLNEXTLEVEL("reset")
-assert(frame.stats.text:find("0 XP / h", 1, true))
+assert(frame.stats.text:find(string.format(addon.L.stats, "0", "--", "150", "300", "   (?)"), 1, true))
 SlashCmdList.TILLNEXTLEVEL("hide"); assert(not frame.shown)
 SlashCmdList.TILLNEXTLEVEL("show"); assert(frame.shown)
 SlashCmdList.TILLNEXTLEVEL("scale 9"); assert(TillNextLevelDB.scale == 1)
 SlashCmdList.TILLNEXTLEVEL("scale 1.2"); assert(TillNextLevelDB.scale == 1.2)
+SlashCmdList.TILLNEXTLEVEL("scale 1,3"); assert(TillNextLevelDB.scale == 1.3)
 -- Client without reward API must still load and label the total as partial.
 GetQuestLogRewardXP = nil
 fire("QUEST_LOG_UPDATE")
@@ -81,6 +83,6 @@ assert(frame.stats.text:find("+0", 1, true) and frame.stats.text:find("(?)", 1, 
 frame.scripts.OnEnter()
 level, maximum = 60, 0
 fire("PLAYER_XP_UPDATE", "player")
-assert(frame.title.text:find("XP désactivée", 1, true))
+assert(frame.title.text == string.format(addon.L.capped, 60))
 assert(not frame.actual.shown)
-print("runtime: OK")
+print("runtime " .. GetLocale() .. ": OK")

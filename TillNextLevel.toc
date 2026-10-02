@@ -2,9 +2,19 @@
 ## Title: Till Next Level
 ## Notes: Experience bar, session XP/hour and quest XP forecast.
 ## Notes-frFR: Barre d'expérience, XP par heure et prévision des quêtes.
+## Notes-deDE: Erfahrungsleiste, EP pro Stunde und Questvorschau.
+## Notes-esES: Barra de experiencia, EXP por hora y previsión de misiones.
+## Notes-esMX: Barra de experiencia, EXP por hora y previsión de misiones.
+## Notes-itIT: Barra dell'esperienza, PE all'ora e previsione delle missioni.
+## Notes-ptBR: Barra de experiência, EXP por hora e previsão de missões.
+## Notes-ruRU: Полоса опыта, опыт в час и прогноз наград за задания.
+## Notes-koKR: 경험치 바, 시간당 경험치 및 퀘스트 경험치 예상.
+## Notes-zhCN: 经验条、每小时经验及任务经验预估。
+## Notes-zhTW: 經驗條、每小時經驗及任務經驗預估。
 ## Author: G3nkidan
-## Version: 0.1.4
+## Version: 0.1.5
 ## SavedVariablesPerCharacter: TillNextLevelDB
 
+Localization.lua
 Model.lua
 TillNextLevel.lua

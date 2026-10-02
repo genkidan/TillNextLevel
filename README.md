@@ -2,6 +2,8 @@
 
 Addon autonome pour **WoW Forever 1.60.1 (Interface 16001)**, inspiré du principe des barres d'XP de Luxthos. Aucune dépendance à WeakAuras.
 
+La langue est sélectionnée automatiquement selon le client : français, anglais (US/GB), allemand, espagnol (ES/MX), italien, portugais brésilien, russe, coréen et chinois simplifié/traditionnel. Les noms de quêtes et la police proviennent du jeu. Les commandes `/tnl` restent identiques dans toutes les langues ; les nombres et les durées sont localisés. Une langue inconnue utilise l'anglais.
+
 - XP actuelle, XP requise et pourcentage du niveau.
 - XP par heure et temps estimé avant le niveau suivant.
 - Projection sur la barre : bleu = XP actuelle, vert = quêtes terminées prêtes à rendre, or = quêtes en cours.
@@ -33,4 +35,4 @@ L'addon ne modifie pas la sélection du journal de quêtes. Les autres variantes
 
 ## Vérification
 
-`tests/model.lua` et `tests/runtime.lua` vérifient les calculs et les événements avec des API simulées. Une validation en jeu reste nécessaire pour confirmer l'affichage et la disponibilité des récompenses sur la bêta Forever.
+`tests/model.lua`, `tests/localization.lua` et `tests/runtime.lua` vérifient les calculs, les traductions et les événements avec des API simulées. Le test de chargement peut être exécuté pour chaque langue, par exemple `tests/runtime.lua deDE`. Une validation en jeu reste nécessaire pour confirmer l'affichage et la disponibilité des récompenses sur la bêta Forever.
