@@ -57,6 +57,7 @@ fire("ADDON_LOADED", "TillNextLevel")
 fire("PLAYER_LOGIN")
 local frame = TillNextLevelFrame
 assert(frame.title.text:find("800 / 1 000", 1, true))
+assert(frame.title.text:find("Restant : 200 XP (20.0%)", 1, true))
 assert(frame.stats.text:find("+150", 1, true))
 assert(frame.stats.text:find("+300", 1, true))
 assert(frame.stats.text:find("(?)", 1, true))

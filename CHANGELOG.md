@@ -1,5 +1,9 @@
 # Historique
 
+## 0.1.4
+
+- Affichage en haut de l'XP restante avant le prochain niveau, en valeur et en pourcentage, à côté de la progression actuelle.
+
 ## 0.1.3
 
 - Infobulle positionnée sous la barre avec un espace de 14 pour laisser les informations visibles.

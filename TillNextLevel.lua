@@ -117,7 +117,8 @@ local function Refresh()
         frame.title:SetText(string.format(T("Niveau %d · XP désactivée", "Level %d · XP disabled"), level))
         frame.stats:SetText("Till Next Level")
     else
-        frame.title:SetText(string.format(T("Niv. %d   %s / %s XP   (%.1f%%)", "Lv. %d   %s / %s XP   (%.1f%%)"), level, number(xp), number(maximum), current * 100))
+        local remaining = math.max(0, maximum - xp)
+        frame.title:SetText(string.format(T("Niv. %d   %s / %s XP   (%.1f%%)   ·   Restant : %s XP (%.1f%%)", "Lv. %d   %s / %s XP   (%.1f%%)   ·   Remaining: %s XP (%.1f%%)"), level, number(xp), number(maximum), current * 100, number(remaining), (1 - current) * 100))
         local rate = addon.Rate(session, GetTime())
         frame.stats:SetText(string.format(T("%s XP / h   ·   Prochain niveau : %s   ·   Prêtes : +%s   ·   En cours : +%s%s", "%s XP / h   ·   Next level: %s   ·   Ready: +%s   ·   In progress: +%s%s"), number(rate), rate > 0 and duration((maximum - xp) / rate * 3600) or "--", number(quests.ready), number(quests.ongoing), quests.unknown > 0 and "   (?)" or ""))
     end
