@@ -57,9 +57,9 @@ fire("ADDON_LOADED", "TillNextLevel")
 fire("PLAYER_LOGIN")
 local frame = TillNextLevelFrame
 assert(frame.title.text:find("800 / 1 000", 1, true))
-assert(frame.forecast.text:find("+150", 1, true))
-assert(frame.forecast.text:find("+300", 1, true))
-assert(frame.forecast.text:find("(?)", 1, true))
+assert(frame.stats.text:find("+150", 1, true))
+assert(frame.stats.text:find("+300", 1, true))
+assert(frame.stats.text:find("(?)", 1, true))
 clock, xp = 60, 900
 fire("PLAYER_XP_UPDATE", "player")
 assert(frame.stats.text:find("6 000 XP / h", 1, true))
@@ -76,7 +76,7 @@ SlashCmdList.TILLNEXTLEVEL("scale 1.2"); assert(TillNextLevelDB.scale == 1.2)
 GetQuestLogRewardXP = nil
 fire("QUEST_LOG_UPDATE")
 events.scripts.OnUpdate(events, 1)
-assert(frame.forecast.text:find("+0", 1, true) and frame.forecast.text:find("(?)", 1, true))
+assert(frame.stats.text:find("+0", 1, true) and frame.stats.text:find("(?)", 1, true))
 frame.scripts.OnEnter()
 level, maximum = 60, 0
 fire("PLAYER_XP_UPDATE", "player")

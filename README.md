@@ -12,7 +12,7 @@ Addon autonome pour **WoW Forever 1.60.1 (Interface 16001)**, inspiré du princi
 
 Installer le dossier `TillNextLevel` dans `Interface/AddOns`, puis redémarrer le jeu ou faire `/reload` si l'addon était déjà détecté.
 
-**Cliquer-glisser avec le bouton gauche** déplace la barre, sans touche supplémentaire. Si la position est verrouillée, utiliser `/tnl unlock`. La barre mesure 640 × 132, avec une jauge de 24 et des textes de 20 et 16 pour améliorer la lisibilité ; `/tnl scale` permet de l'agrandir davantage.
+**Cliquer-glisser avec le bouton gauche** déplace la barre, sans touche supplémentaire. Si la position est verrouillée, utiliser `/tnl unlock`. La barre mesure 1000 × 102, avec une jauge de 24 et des textes de 20 et 16. Le fond est transparent, sans cadre ni contour. Les informations XP/heure, prochain niveau, quêtes prêtes et en cours sont réunies sur une seule ligne sous la jauge. `/tnl scale` permet d'ajuster la taille.
 
 | Commande | Action |
 | --- | --- |

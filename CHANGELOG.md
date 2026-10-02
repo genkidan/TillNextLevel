@@ -1,5 +1,10 @@
 # Historique
 
+## 0.1.2
+
+- Fond transparent : suppression du fond du panneau, de la piste sombre et de l'accent supérieur ; aucun cadre ni contour.
+- Barre élargie à 1000, avec XP/heure, prochain niveau, quêtes prêtes et en cours sur une seule ligne.
+
 ## 0.1.1
 
 - Barre agrandie à 640 × 132, jauge plus épaisse et textes plus grands.
