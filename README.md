@@ -1,38 +1,38 @@
 # Till Next Level
 
-Addon autonome pour **WoW Forever 1.60.1 (Interface 16001)**, inspiré du principe des barres d'XP de Luxthos. Aucune dépendance à WeakAuras.
+Standalone addon for **WoW Forever 1.60.1 (Interface 16001)**, inspired by Luxthos XP bars. No WeakAuras dependency.
 
-La langue est sélectionnée automatiquement selon le client : français, anglais (US/GB), allemand, espagnol (ES/MX), italien, portugais brésilien, russe, coréen et chinois simplifié/traditionnel. Les noms de quêtes et la police proviennent du jeu. Les commandes `/tnl` restent identiques dans toutes les langues ; les nombres et les durées sont localisés. Une langue inconnue utilise l'anglais.
+The language is selected automatically based on your game client: French, English (US/GB), German, Spanish (ES/MX), Italian, Brazilian Portuguese, Russian, Korean, and Simplified/Traditional Chinese. Quest names and fonts come from the game. `/tnl` commands are the same in every language; numbers and durations are localized. Unsupported languages fall back to English.
 
-- XP actuelle, XP requise et pourcentage du niveau.
-- XP par heure et temps estimé avant le niveau suivant.
-- Projection sur la barre : bleu = XP actuelle, vert = quêtes terminées prêtes à rendre, or = quêtes en cours.
-- Détail des récompenses, XP reposée et temps estimé après remise des quêtes au survol.
-- Position, échelle et visibilité enregistrées par personnage.
+- Current XP, required XP, and level progress percentage.
+- XP per hour and estimated time to the next level.
+- Bar forecast: blue = current XP, green = completed quests ready to turn in, gold = quests in progress, gray = remaining space after these forecasts.
+- Hover for reward details, rested XP, and estimated time after turning in completed quests.
+- Position, scale, and visibility saved per character.
 
-## Utilisation
+## Usage
 
-Installer le dossier `TillNextLevel` dans `Interface/AddOns`, puis redémarrer le jeu ou faire `/reload` si l'addon était déjà détecté.
+Install the `TillNextLevel` folder in `Interface/AddOns`, then restart the game or use `/reload` if the addon was already detected.
 
-**Cliquer-glisser avec le bouton gauche** déplace la barre, sans touche supplémentaire. Si la position est verrouillée, utiliser `/tnl unlock`. La barre mesure 1000 × 102, avec une jauge de 24 et des textes de 20 et 16. Le fond est transparent, sans cadre ni contour. Les informations XP/heure, prochain niveau, quêtes prêtes et en cours sont réunies sur une seule ligne sous la jauge. `/tnl scale` permet d'ajuster la taille.
+**Click and drag with the left mouse button** to move the bar, without holding any additional key. If the position is locked, use `/tnl unlock`. The frame measures 1000 × 102, with a 24-pixel-high XP bar and font sizes of 20 and 16. The panel background is transparent, without a frame or border; the XP bar has a gray track. XP/hour, time to the next level, completed quests, and quests in progress appear on one line below the bar. Use `/tnl scale` to adjust the size.
 
-| Commande | Action |
+| Command | Action |
 | --- | --- |
-| `/tnl` | Afficher les commandes |
-| `/tnl show` / `/tnl hide` | Afficher / masquer |
-| `/tnl lock` / `/tnl unlock` | Verrouiller / déverrouiller la position |
-| `/tnl center` | Replacer la barre sous le centre de l'écran |
-| `/tnl scale 1.2` | Régler l'échelle entre 0.5 et 2 |
-| `/tnl reset` | Recommencer la mesure de la session |
+| `/tnl` | Show available commands |
+| `/tnl show` / `/tnl hide` | Show / hide |
+| `/tnl lock` / `/tnl unlock` | Lock / unlock the position |
+| `/tnl center` | Move the bar below the center of the screen |
+| `/tnl scale 1.2` | Set the scale between 0.5 and 2 |
+| `/tnl reset` | Restart session tracking |
 
-## Calculs et limites
+## Calculations and limitations
 
-L'XP par heure est la moyenne depuis la connexion, le dernier `/reload` ou `/tnl reset`, pauses comprises. Les passages d'un niveau à l'autre sont pris en compte. Un saut de plusieurs niveaux réinitialise la mesure car les besoins des niveaux intermédiaires ne sont pas connus.
+XP per hour is the average since login, the last `/reload`, or `/tnl reset`, including breaks. Level transitions are taken into account. Skipping multiple levels resets tracking because the XP requirements for the intermediate levels are unknown.
 
-Les récompenses sont lues avec `GetQuestLogRewardXP(questID)` lorsque le client expose cette fonction. Une récompense indisponible est indiquée par `?` et le total est signalé comme partiel. Aucun montant n'est inventé. Les quêtes échouées et les entrées cachées sont exclues. La prévision n'inclut pas l'XP des monstres à tuer pour finir une quête ni d'éventuels bonus non inclus dans la récompense fournie par le client. Les projections visuelles s'arrêtent à la fin du niveau ; les totaux restent complets.
+Rewards are read using `GetQuestLogRewardXP(questID)` when the client provides this function. Unavailable rewards are shown as `?`, and the total is marked as partial. No reward amounts are invented. Failed quests and hidden entries are excluded. The forecast does not include XP from killing enemies to complete a quest or any bonuses absent from the reward provided by the client. Visual forecasts stop at the end of the level; reward totals remain complete.
 
-L'addon ne modifie pas la sélection du journal de quêtes. Les autres variantes de Classic ne sont pas couvertes par cette première version.
+The addon does not change the selected quest in the quest log. Other Classic variants are outside the scope of this initial release.
 
-## Vérification
+## Verification
 
-`tests/model.lua`, `tests/localization.lua` et `tests/runtime.lua` vérifient les calculs, les traductions et les événements avec des API simulées. Le test de chargement peut être exécuté pour chaque langue, par exemple `tests/runtime.lua deDE`. Une validation en jeu reste nécessaire pour confirmer l'affichage et la disponibilité des récompenses sur la bêta Forever.
+`tests/model.lua`, `tests/localization.lua`, and `tests/runtime.lua` check calculations, translations, and events using simulated APIs. The runtime test can be run for each language, for example `tests/runtime.lua deDE`. In-game validation is still needed to confirm the appearance and availability of quest rewards on the Forever beta.
