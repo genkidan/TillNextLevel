@@ -12,6 +12,7 @@
 ## Notes-zhCN: 经验条、每小时经验及任务经验预估。
 ## Notes-zhTW: 經驗條、每小時經驗及任務經驗預估。
 ## Author: G3nkidan
+## X-License: GPL-3.0-only
 ## Version: 0.1.6
 ## SavedVariablesPerCharacter: TillNextLevelDB
 

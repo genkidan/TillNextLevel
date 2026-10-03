@@ -36,3 +36,9 @@ The addon does not change the selected quest in the quest log. Other Classic var
 ## Verification
 
 `tests/model.lua`, `tests/localization.lua`, and `tests/runtime.lua` check calculations, translations, and events using simulated APIs. The runtime test can be run for each language, for example `tests/runtime.lua deDE`. In-game validation is still needed to confirm the appearance and availability of quest rewards on the Forever beta.
+
+## License
+
+Copyright (C) 2026 G3nkidan.
+
+Till Next Level is licensed under the GNU General Public License, version 3 only (GPL-3.0-only). You may redistribute and modify it under the terms of this license. It is distributed without any warranty. See [LICENSE](LICENSE) for the full license text.
