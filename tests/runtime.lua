@@ -139,6 +139,19 @@ assert(cells[1].text=="Ready" and cells[2].text=="Captain" and cells[3].text=="S
 assert(frame.questTooltipColumns[2][2].text=="" and frame.questTooltipColumns[2][3].text=="", "Ongoing quests leave turn-in columns blank")
 assert(cells[2].point[4]==frame.questTooltipColumns[2][2].point[4], "NPC column uses the same offset for every row")
 assert(cells[3].point[4]==frame.questTooltipColumns[2][3].point[4], "Location column is aligned")
+local secret = {}
+issecretvalue = function(value) return value == secret end
+local originalMeasure, originalWidth = Methods.GetStringWidth, UIParent.GetWidth
+Methods.GetStringWidth = function() return secret end
+UIParent.GetWidth = function() return secret end
+frame.scripts.OnEnter()
+assert(cells[1].width == 63 and cells[2].width == 63 and cells[3].width == 81, "Secret geometry uses public text estimates")
+assert(cells[2].point[4]==frame.questTooltipColumns[2][2].point[4], "Fallback columns remain aligned")
+Methods.GetStringWidth = function() error("restricted measurement") end
+frame.scripts.OnEnter()
+assert(cells[1].width == 63, "Unavailable measurements also use safe estimates")
+Methods.GetStringWidth, UIParent.GetWidth = originalMeasure, originalWidth
+issecretvalue = nil
 function GameTooltip:NumLines() return nil end
 for i=1,30 do _G["GameTooltipTextLeft"..i]=nil end
 addon.TurnInDetails = originalTurnIn

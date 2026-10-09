@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.18
+
+- Guard tooltip column and screen measurements against secret numeric values before arithmetic. Use public text-length estimates when a measurement is restricted or unavailable, preserving aligned quest columns without conversion errors.
+
 ## 0.1.17
 
 - Align quest names, turn-in NPCs, locations, and XP in tooltip columns without visible headers or separators. Retain status colors, completed-first sorting, and blank missing details.

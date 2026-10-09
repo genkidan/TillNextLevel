@@ -1,6 +1,6 @@
 # Till Next Level
 
-**Version: 0.1.17**
+**Version: 0.1.18**
 
 Standalone addon for **WoW Forever 1.60.1 (Interface 16001)**, inspired by Luxthos XP bars. No WeakAuras dependency.
 

@@ -150,6 +150,13 @@ local function ScanQuests()
     end)
 end
 
+local function AccessibleNumber(value, fallback)
+    -- Check secrecy before any comparison, conversion or arithmetic.
+    if issecretvalue and issecretvalue(value) then return fallback end
+    if type(value) ~= "number" or value ~= value or value < 0 or value == math.huge then return fallback end
+    return value
+end
+
 local function Tooltip()
     if type(frame.questTooltipColumns) ~= "table" then frame.questTooltipColumns = {} end
     for _, cells in ipairs(frame.questTooltipColumns) do for _, cell in ipairs(cells) do cell:Hide() end end
@@ -193,14 +200,17 @@ local function Tooltip()
             end
             for i,cell in ipairs(cells) do
                 cell:SetWidth(0); cell:SetText(values[i]); cell:SetTextColor(r,g,b)
-                widths[i]=math.max(widths[i],cell:GetStringWidth())
+                local ok, measured = pcall(cell.GetStringWidth, cell)
+                -- Tooltip anchors can make geometry secret even for public quest text.
+                local estimate = select(2, values[i]:gsub("[^\128-\191]", "")) * 9
+                widths[i]=math.max(widths[i],AccessibleNumber(ok and measured or nil, estimate))
             end
             columnRows[#columnRows+1]={cells=cells,anchor=anchor}
             anchor:SetText(" ")
         end
     end
     local total = widths[1]+widths[2]+widths[3]+48+100
-    local available = math.max(200, UIParent:GetWidth()-40)
+    local available = math.max(200, AccessibleNumber(UIParent:GetWidth(), 1024)-40)
     if total > available then
         local factor=(available-148)/math.max(1,total-148)
         for i=1,3 do widths[i]=widths[i]*factor end
