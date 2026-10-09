@@ -1,12 +1,15 @@
 # Till Next Level
 
+**Version: 0.1.8**
+
 Standalone addon for **WoW Forever 1.60.1 (Interface 16001)**, inspired by Luxthos XP bars. No WeakAuras dependency.
 
 The language is selected automatically based on your game client: French, English (US/GB), German, Spanish (ES/MX), Italian, Brazilian Portuguese, Russian, Korean, and Simplified/Traditional Chinese. Quest names and fonts come from the game. `/tnl` commands are the same in every language; numbers and durations are localized. Unsupported languages fall back to English.
 
 - Current XP, required XP, and level progress percentage.
 - XP per hour and estimated time to the next level.
-- Bar forecast: blue = current XP, green = completed quests ready to turn in, gold = quests in progress, gray = remaining space after these forecasts.
+- Session duration above the bar, with completed and ongoing quest XP totals below.
+- Bar forecast: character class color = current XP, gold = completed quests ready to turn in, bronze = quests in progress, dark gray = remaining space after these forecasts.
 - Hover for reward details, rested XP, and estimated time after turning in completed quests.
 - Position, scale, and visibility saved per character.
 
@@ -14,7 +17,7 @@ The language is selected automatically based on your game client: French, Englis
 
 Install the `TillNextLevel` folder in `Interface/AddOns`, then restart the game or use `/reload` if the addon was already detected.
 
-**Click and drag with the left mouse button** to move the bar, without holding any additional key. If the position is locked, use `/tnl unlock`. The frame measures 1000 × 102, with a 24-pixel-high XP bar and font sizes of 20 and 16. The panel background is transparent, without a frame or border; the XP bar has a gray track. XP/hour, time to the next level, completed quests, and quests in progress appear on one line below the bar. Use `/tnl scale` to adjust the size.
+**Click and drag with the left mouse button** to move the bar, without holding any additional key. If the position is locked, use `/tnl unlock`. The compact frame measures 520 × 94, with a 28-pixel-high XP bar. Time to the next level and session duration appear above; level, current/required XP, and progress percentage appear inside the bar. Completed quest XP and XP/hour appear below, with ongoing quest XP on an additional line. The panel background is transparent, with class-colored XP and gold/bronze quest forecasts and a dark track. Hover for ongoing quest totals, remaining/rested XP, and quest details. Use `/tnl scale` to adjust the size.
 
 | Command | Action |
 | --- | --- |

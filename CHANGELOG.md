@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.8
+
+- Use the current character's class color for the XP fill, with a blue fallback if the client does not provide class color data. Quest forecasts retain gold and bronze.
+
+## 0.1.7
+
+- Display ongoing quest XP on an additional line below completed quest XP.
+- Redesigned the interface as a compact 520 × 94 panel: blue/gold bar, level and XP inside, percentage at the right, time/session above, and completed quest XP and XP/hour below.
+- Retained localized labels, quest forecasts, tooltip details, dragging, and saved preferences. Completed quests use gold; ongoing quests use bronze.
+
 ## 0.1.6
 
 - Added a gray track across the full width of the bar to show the remaining space after current XP and quest forecasts.

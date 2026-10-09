@@ -260,6 +260,30 @@ local L = {}
 for index, key in ipairs(keys) do L[key] = selected[index] or locales.enUS[index] end
 -- Format percentages separately so decimal localization never alters grouped XP.
 L.title = L.title:gsub("%%.1f", "%%s")
+local compact = {
+    enUS = { "Level %d", "Completed quests", "Gold: ready to turn in · Bronze: in progress" },
+    frFR = { "Niveau %d", "Quêtes terminées", "Or : prêtes à rendre · Bronze : en cours" },
+    deDE = { "Level %d", "Abgeschlossene Quests", "Gold: abgabebereit · Bronze: in Arbeit" },
+    esES = { "Nivel %d", "Misiones completadas", "Oro: listas para entregar · Bronce: en curso" },
+    itIT = { "Livello %d", "Missioni completate", "Oro: da consegnare · Bronzo: in corso" },
+    ptBR = { "Nível %d", "Missões concluídas", "Dourado: prontas para entregar · Bronze: em andamento" },
+    ruRU = { "Уровень %d", "Выполненные задания", "Золото: готовы к сдаче · Бронза: в процессе" },
+    koKR = { "레벨 %d", "완료한 퀘스트", "금색: 완료 · 청동색: 진행 중" },
+    zhCN = { "等级 %d", "已完成任务", "金色：可交付 · 古铜色：进行中" },
+    zhTW = { "等級 %d", "已完成任務", "金色：可交付 · 古銅色：進行中" },
+}
+compact.enGB, compact.esMX = compact.enUS, compact.esES
+local labels = compact[locale] or compact.enUS
+L.compactLevel, L.completedQuests, L.legend = labels[1], labels[2], labels[3]
+local ongoing = {
+    enUS = "Quests in progress", enGB = "Quests in progress",
+    frFR = "Quêtes en cours", deDE = "Laufende Quests",
+    esES = "Misiones en curso", esMX = "Misiones en curso",
+    itIT = "Missioni in corso", ptBR = "Missões em andamento",
+    ruRU = "Задания в процессе", koKR = "진행 중인 퀘스트",
+    zhCN = "进行中的任务", zhTW = "進行中的任務",
+}
+L.ongoingQuests = ongoing[locale] or ongoing.enUS
 addon.L = L
 addon.locales = locales
 addon.localeKeys = keys
