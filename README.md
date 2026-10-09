@@ -1,6 +1,6 @@
 # Till Next Level
 
-**Version: 0.1.9**
+**Version: 0.1.17**
 
 Standalone addon for **WoW Forever 1.60.1 (Interface 16001)**, inspired by Luxthos XP bars. No WeakAuras dependency.
 
@@ -8,12 +8,14 @@ The language is selected automatically based on your game client: French, Englis
 
 - Current XP, required XP, and level progress percentage.
 - XP per hour and estimated time to the next level.
-- Session duration above the bar, with completed and ongoing quest XP totals below.
+- Session duration above the modern bar, with completed quest counts and XP in green and ongoing quest counts and XP in gold below. Counts include quests with unavailable XP rewards; failed and hidden quests are excluded.
 - Bar forecast: character class color = current XP, gold = completed quests ready to turn in, bronze = quests in progress, dark gray = remaining space after these forecasts.
-- Hover for reward details, rested XP, and estimated time after turning in completed quests.
+- Hover for reward details, rested XP, and estimated time after turning in completed quests. Completed quest names and rewards are green; ongoing quest names and rewards are gold.
 - Position, scale, and visibility saved per character.
 
 ## Usage
+
+Right-click the bar or use `/tnl options` to choose the classic wide appearance or the modern compact appearance. The choice is saved per character and applies immediately. Modern remains the default. Classic restores the 1000 × 102 layout, blue/green/gold fills, XP and remaining XP above the bar, and session rate plus completed/ongoing quest totals below. Both appearances share the same XP calculations, tooltip, position, scale, and Blizzard XP bar preference.
 
 Install the `TillNextLevel` folder in `Interface/AddOns`, then restart the game or use `/reload` if the addon was already detected.
 
@@ -22,6 +24,8 @@ Install the `TillNextLevel` folder in `Interface/AddOns`, then restart the game 
 | Command | Action |
 | --- | --- |
 | `/tnl` | Show available commands |
+| `/tnl options` | Open the appearance chooser |
+| `/tnl skin classic` / `/tnl skin modern` | Select the old / new appearance |
 | `/tnl show` / `/tnl hide` | Show / hide |
 | `/tnl blizzard hide` / `/tnl blizzard show` | Hide / restore the Blizzard XP bar; saved per character |
 | `/tnl blizzard status` | Report detected Blizzard tracking frames for troubleshooting |
@@ -31,6 +35,10 @@ Install the `TillNextLevel` folder in `Interface/AddOns`, then restart the game 
 | `/tnl reset` | Restart session tracking |
 
 ## Calculations and limitations
+
+Quest tooltip rows align quest titles, NPC names, locations, and XP in columns without visible headers or separators. Empty details remain blank. Column widths adapt to the available screen width; long values may be clipped to keep rows on one line.
+
+Tooltip quests are grouped with completed quests first, preserving quest-log order within each group. Completed quests display turn-in waypoint instructions and the destination map when the client provides them. Enable **QuestieDB** alone to read finisher NPC names directly through `LibQuestieDB`; the full Questie addon is optional. NPC spawn data also supplies zone names and a representative coordinate per zone when available. Multiple possible finishers or zones are listed; these are database locations, not a live NPC position. Older Questie query APIs remain supported. Missing details are omitted; custom Forever quests may be absent from the database.
 
 XP per hour is the average since login, the last `/reload`, or `/tnl reset`, including breaks. Level transitions are taken into account. Skipping multiple levels resets tracking because the XP requirements for the intermediate levels are unknown.
 

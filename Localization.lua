@@ -274,7 +274,7 @@ local compact = {
 }
 compact.enGB, compact.esMX = compact.enUS, compact.esES
 local labels = compact[locale] or compact.enUS
-L.compactLevel, L.completedQuests, L.legend = labels[1], labels[2], labels[3]
+L.compactLevel, L.completedQuests = labels[1], labels[2]
 local ongoing = {
     enUS = "Quests in progress", enGB = "Quests in progress",
     frFR = "Quêtes en cours", deDE = "Laufende Quests",
@@ -285,6 +285,9 @@ local ongoing = {
 }
 L.ongoingQuests = ongoing[locale] or ongoing.enUS
 addon.L = L
+L.skinTitle = locale == "frFR" and "Till Next Level : apparence" or "Till Next Level: appearance"
+L.classicSkin = locale == "frFR" and "Ancien affichage" or "Classic appearance"
+L.modernSkin = locale == "frFR" and "Nouvel affichage" or "Modern appearance"
 addon.locales = locales
 addon.localeKeys = keys
 addon.decimalSeparator = ({ frFR = ",", deDE = ",", esES = ",", esMX = ",", itIT = ",", ptBR = ",", ruRU = "," })[locale] or "."

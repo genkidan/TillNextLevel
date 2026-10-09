@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.1.17
+
+- Align quest names, turn-in NPCs, locations, and XP in tooltip columns without visible headers or separators. Retain status colors, completed-first sorting, and blank missing details.
+- Bound column widths to the available screen space and reuse tooltip labels safely.
+
+## 0.1.16
+
+- Keep each tooltip quest on a single row: append available turn-in NPC and location details to the quest title, with the XP reward on the right. Preserve completed/ongoing colors and sorting.
+
+## 0.1.15
+
+- Read the standalone QuestieDB provider directly through `LibQuestieDB.Quest.Get` and `LibQuestieDB.Npc.Get`, without requiring Questie's loader or interface.
+- Display finisher NPC zones and representative spawn coordinates when available, retaining compatibility with older Questie query APIs and safe omission of missing data.
+
+## 0.1.14
+
+- Sort tooltip quests with ready-to-turn-in quests first and ongoing quests afterward, preserving log order within each group.
+- Add completed-quest turn-in waypoint text and destination map when available from the client, plus finisher NPC names when an optional Questie database provides them. Omit unavailable data safely.
+
+## 0.1.13
+
+- Close the appearance chooser automatically after selecting either skin.
+
+## 0.1.12
+
+- Format current and remaining XP percentages with exactly two localized decimal places in the classic appearance, preventing long floating-point values from overflowing the title.
+
+## 0.1.11
+
+- Show completed quest counts and XP totals in green and ongoing quest counts and XP totals in gold below the modern bar. Count valid quests even when their XP reward is unavailable.
+- Color both the quest name and reward in tooltip rows: green for completed quests, gold for ongoing quests. Match the localized legend to these colors.
+
+## 0.1.10
+
+- Add a per-character appearance choice between the original wide XP bar and the modern compact panel, with immediate switching and modern as the default.
+- Open the chooser by right-clicking the bar or using `/tnl options`; also support `/tnl skin classic` and `/tnl skin modern`.
+- Preserve shared XP and quest tracking, dragging, scale, visibility, and Blizzard XP bar controls in both appearances.
+
 ## 0.1.9
 
 - Added `/tnl blizzard hide` and `/tnl blizzard show`, with a per-character saved preference.

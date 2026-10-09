@@ -1,6 +1,6 @@
 local addonName, addon = ...
 local frame, session, db
-local quests = { ready = 0, ongoing = 0, unknown = 0, rows = {} }
+local quests = { ready = 0, ongoing = 0, readyCount = 0, ongoingCount = 0, unknown = 0, rows = {} }
 local questDirty, questElapsed, elapsed = true, 0, 0
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local L = addon.L
@@ -105,7 +105,7 @@ end
 local function ScanQuests()
     local log = C_QuestLog or {}
     local count = log.GetNumQuestLogEntries or GetNumQuestLogEntries
-    quests = { ready = 0, ongoing = 0, unknown = 0, rows = {} }
+    quests = { ready = 0, ongoing = 0, readyCount = 0, ongoingCount = 0, unknown = 0, rows = {} }
     if not count then return end
     for index = 1, count() do
         local info
@@ -122,6 +122,8 @@ local function ScanQuests()
             if log.IsComplete then complete = log.IsComplete(id) end
             local failed = info.failed or (log.IsFailed and log.IsFailed(id))
             if not failed then
+                if complete then quests.readyCount = quests.readyCount + 1
+                else quests.ongoingCount = quests.ongoingCount + 1 end
                 local reward
                 if GetQuestLogRewardXP then
                     local ok, value = pcall(GetQuestLogRewardXP, id)
@@ -137,17 +139,25 @@ local function ScanQuests()
                 end
                 quests.rows[#quests.rows + 1] = {
                     title = info.title or string.format(L.quest, id), xp = reward, complete = complete,
+                    id = id, order = index,
                 }
             end
         end
     end
+    table.sort(quests.rows,function(a,b)
+        if not not a.complete ~= not not b.complete then return not not a.complete end
+        return a.order < b.order
+    end)
 end
 
 local function Tooltip()
+    if type(frame.questTooltipColumns) ~= "table" then frame.questTooltipColumns = {} end
+    for _, cells in ipairs(frame.questTooltipColumns) do for _, cell in ipairs(cells) do cell:Hide() end end
     GameTooltip:SetOwner(frame, "ANCHOR_NONE")
     GameTooltip:ClearAllPoints()
     GameTooltip:SetPoint("TOP", frame, "BOTTOM", 0, -14)
     GameTooltip:ClearLines()
+    GameTooltip:SetMinimumWidth(0)
     GameTooltip:AddLine("Till Next Level", 0.35, 0.81, 1)
     local maximum, xp = UnitXPMax("player"), UnitXP("player")
     local rate = addon.Rate(session, GetTime())
@@ -160,10 +170,56 @@ local function Tooltip()
     GameTooltip:AddDoubleLine(L.rested, number(GetXPExhaustion() or 0))
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(L.legend, 0.8, 0.8, 0.8)
-    for _, quest in ipairs(quests.rows) do
-        local r, g, b = 0.75, 0.62, 0.35
-        if quest.complete then r, g, b = 1, 0.76, 0.17 end
-        GameTooltip:AddDoubleLine(quest.title, quest.xp and (number(quest.xp) .. " " .. L.xp) or "?", r, g, b, r, g, b)
+    local columnRows, widths = {}, {0,0,0}
+    for index, quest in ipairs(quests.rows) do
+        local r, g, b = 1, 0.82, 0
+        if quest.complete then r, g, b = 0.3, 0.85, 0.5 end
+        local title, details, columns = quest.title
+        if quest.complete then
+            details, columns = addon.TurnInDetails(quest.id)
+        end
+        local values = {title, columns and columns.npc or "", columns and columns.location or details or ""}
+        for i,value in ipairs(values) do values[i]=value:gsub("[\r\n]+"," ") end
+        GameTooltip:AddDoubleLine(details and (title .. " — " .. details:gsub("[\r\n]+"," ")) or title,
+            quest.xp and (number(quest.xp) .. " " .. L.xp) or "?", r, g, b, r, g, b)
+        local lineNumber = GameTooltip:NumLines()
+        local anchor = lineNumber and _G["GameTooltipTextLeft" .. lineNumber]
+        if anchor then
+            local cells = frame.questTooltipColumns[index]
+            if not cells then
+                cells = {}
+                for i=1,3 do cells[i]=GameTooltip:CreateFontString(nil,"OVERLAY","GameTooltipText"); cells[i]:SetJustifyH("LEFT"); cells[i]:SetWordWrap(false) end
+                frame.questTooltipColumns[index] = cells
+            end
+            for i,cell in ipairs(cells) do
+                cell:SetWidth(0); cell:SetText(values[i]); cell:SetTextColor(r,g,b)
+                widths[i]=math.max(widths[i],cell:GetStringWidth())
+            end
+            columnRows[#columnRows+1]={cells=cells,anchor=anchor}
+            anchor:SetText(" ")
+        end
+    end
+    local total = widths[1]+widths[2]+widths[3]+48+100
+    local available = math.max(200, UIParent:GetWidth()-40)
+    if total > available then
+        local factor=(available-148)/math.max(1,total-148)
+        for i=1,3 do widths[i]=widths[i]*factor end
+        total=available
+    end
+    if #columnRows > 0 then
+        GameTooltip:SetMinimumWidth(total)
+        for _,row in ipairs(columnRows) do
+            local offset=0
+            for i,cell in ipairs(row.cells) do
+                cell:ClearAllPoints(); cell:SetPoint("TOPLEFT",row.anchor,"TOPLEFT",offset,0)
+                cell:SetWidth(math.max(1,widths[i])); cell:Show()
+                offset=offset+widths[i]+16
+            end
+        end
+        if frame.questTooltipHideHook ~= true then
+            frame.questTooltipHideHook=true
+            GameTooltip:HookScript("OnHide",function() for _,cells in ipairs(frame.questTooltipColumns) do for _,cell in ipairs(cells) do cell:Hide() end end end)
+        end
     end
     if quests.unknown > 0 then
         GameTooltip:AddLine(L.partial, 1, 0.6, 0.3, true)
@@ -198,13 +254,21 @@ local function Refresh()
     local rate = addon.Rate(session, GetTime())
     frame.time:SetText(L.nextTime .. ": " .. (not capped and rate > 0 and duration(math.max(0, maximum - xp) / rate * 3600) or "--"))
     frame.session:SetText(L.sessionDuration .. ": " .. duration(GetTime() - session.started))
-    frame.completed:SetText(L.completedQuests .. ": |cffffc02b" .. number(quests.ready) .. "|r" .. (quests.unknown > 0 and " (?)" or ""))
-    frame.pending:SetText(L.ongoingQuests .. ": |cffc09e59" .. number(quests.ongoing) .. "|r" .. (quests.unknown > 0 and " (?)" or ""))
+    frame.completed:SetText(L.completedQuests .. ": |cff4dd980" .. quests.readyCount .. " · " .. number(quests.ready) .. " " .. L.xp .. "|r" .. (quests.unknown > 0 and " (?)" or ""))
+    frame.pending:SetText(L.ongoingQuests .. ": |cffffd100" .. quests.ongoingCount .. " · " .. number(quests.ongoing) .. " " .. L.xp .. "|r" .. (quests.unknown > 0 and " (?)" or ""))
     frame.rate:SetText(L.rate .. ": " .. number(rate))
     frame.level:SetWidth(capped and 400 or 135)
     frame.level:SetText(capped and string.format(L.capped, level) or string.format(L.compactLevel, level))
     frame.progress:SetText(capped and "" or (number(xp) .. " / " .. number(maximum)))
     frame.percent:SetText(capped and "--" or (addon.LocalizeDecimals(string.format("%.1f", current * 100)) .. "%"))
+    if db.skin == "classic" then
+        local remaining = math.max(0, maximum - xp)
+        frame.title:SetText(capped and string.format(L.capped, level) or string.format(L.title,
+            level, number(xp), number(maximum), addon.LocalizeDecimals(string.format("%.2f", current * 100)),
+            number(remaining), addon.LocalizeDecimals(string.format("%.2f", (1-current)*100))))
+        frame.stats:SetText(capped and "Till Next Level" or string.format(L.stats, number(rate),
+            rate > 0 and duration(remaining / rate * 3600) or "--", number(quests.ready), number(quests.ongoing), quests.unknown > 0 and " (?)" or ""))
+    end
     frame:SetShown(not db.hidden)
     if GameTooltip:IsOwned(frame) then Tooltip() end
 end
@@ -212,6 +276,52 @@ end
 local function Position()
     frame:ClearAllPoints()
     frame:SetPoint("CENTER", UIParent, "CENTER", db.x or 0, db.y or -180)
+end
+
+local skinOptions
+local function ApplySkin()
+    if not frame then return end
+    local classic = db.skin == "classic"
+    frame:SetSize(classic and 1000 or 520, classic and 102 or 94)
+    frame.bar:ClearAllPoints()
+    frame.bar:SetPoint("TOPLEFT", classic and 18 or 8, classic and -43 or -25)
+    frame.bar:SetPoint("TOPRIGHT", classic and -18 or -8, classic and -43 or -25)
+    frame.bar:SetHeight(classic and 24 or 28)
+    frame.bar.background:SetVertexColor(classic and .3 or .08, classic and .3 or .09, classic and .3 or .11, classic and 1 or .95)
+    local class = UnitClass and select(2, UnitClass("player"))
+    local color = class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
+    frame.actual:SetVertexColor(classic and .35 or (color and color.r or .04), classic and .65 or (color and color.g or .57), classic and 1 or (color and color.b or .86), 1)
+    frame.ready:SetVertexColor(classic and .3 or 1, classic and .85 or .68, classic and .5 or .02, 1)
+    frame.ongoing:SetVertexColor(classic and 1 or .52, classic and .73 or .38, classic and .25 or .12, 1)
+    frame.shine:SetShown(not classic)
+    frame.title:SetShown(classic); frame.stats:SetShown(classic)
+    for _, key in ipairs({"time","session","level","progress","percent","completed","pending","rate"}) do frame[key]:SetShown(not classic) end
+    if skinOptions then
+        skinOptions.classic:SetText((classic and "✓ " or "") .. L.classicSkin)
+        skinOptions.modern:SetText((not classic and "✓ " or "") .. L.modernSkin)
+    end
+    Position()
+end
+
+local function ShowSkinOptions()
+    if not frame then return end
+    if not skinOptions then
+        skinOptions = CreateFrame("Frame", "TillNextLevelSkinOptions", UIParent)
+        skinOptions:SetSize(270, 120); skinOptions:SetFrameStrata("DIALOG")
+        skinOptions:SetPoint("CENTER")
+        local bg = skinOptions:CreateTexture(nil,"BACKGROUND"); bg:SetAllPoints(); bg:SetTexture(WHITE); bg:SetVertexColor(.06,.06,.08,.98)
+        local title = skinOptions:CreateFontString(nil,"OVERLAY","GameFontNormal"); title:SetPoint("TOP",0,-12); title:SetText(L.skinTitle)
+        local close = CreateFrame("Button",nil,skinOptions,"UIPanelCloseButton"); close:SetPoint("TOPRIGHT",0,0)
+        close:SetScript("OnClick",function() skinOptions:Hide() end)
+        for index, skin in ipairs({"classic","modern"}) do
+            local choice = skin
+            local button = CreateFrame("Button",nil,skinOptions,"UIPanelButtonTemplate")
+            button:SetSize(230,26); button:SetPoint("TOP",0,-38-(index-1)*34)
+            button:SetScript("OnClick",function() db.skin=choice; ApplySkin(); Refresh(); skinOptions:Hide() end)
+            skinOptions[skin]=button
+        end
+    end
+    skinOptions:Show(); ApplySkin()
 end
 
 local function CreateBar()
@@ -244,6 +354,7 @@ local function CreateBar()
     frame.ready = fill(1, 0.68, 0.02)
     frame.ongoing = fill(0.52, 0.38, 0.12)
     local shine = frame.bar:CreateTexture(nil, "OVERLAY")
+    frame.shine = shine
     shine:SetTexture(WHITE)
     shine:SetVertexColor(1, 1, 1, 0.10)
     shine:SetPoint("TOPLEFT", 0, 0)
@@ -271,6 +382,9 @@ local function CreateBar()
     frame.completed = label(frame, "BOTTOMLEFT", 8, 22, 330, 12, "LEFT")
     frame.rate = label(frame, "BOTTOMRIGHT", -8, 22, 165, 12, "RIGHT")
     frame.pending = label(frame, "BOTTOMLEFT", 8, 4, 330, 12, "LEFT")
+    frame.title = label(frame, "TOPLEFT", 18, -14, 964, 20, "CENTER")
+    frame.stats = label(frame, "TOPLEFT", 18, -78, 964, 16, "CENTER")
+    frame:SetScript("OnMouseUp",function(_,button) if button=="RightButton" then ShowSkinOptions() end end)
     frame:SetScript("OnDragStart", function(self)
         if not db.locked then
             GameTooltip:Hide()
@@ -287,7 +401,7 @@ local function CreateBar()
     end)
     frame:SetScript("OnEnter", Tooltip)
     frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
-    Position()
+    ApplySkin()
 end
 
 SLASH_TILLNEXTLEVEL1 = "/tnl"
@@ -295,7 +409,11 @@ SLASH_TILLNEXTLEVEL2 = "/tillnextlevel"
 SlashCmdList.TILLNEXTLEVEL = function(input)
     if not db then return end
     local command, argument = input:lower():match("^%s*(%S*)%s*(.-)%s*$")
-    if command == "reset" then ResetSession(); message(L.reset)
+    if command == "options" then ShowSkinOptions()
+    elseif command == "skin" then
+        if argument == "classic" or argument == "modern" then db.skin=argument; ApplySkin()
+        else message("/tnl skin classic | modern") end
+    elseif command == "reset" then ResetSession(); message(L.reset)
     elseif command == "blizzard" then
         if argument == "status" then BlizzardDiagnostics()
         elseif argument == "hide" or argument == "show" then
@@ -313,7 +431,7 @@ SlashCmdList.TILLNEXTLEVEL = function(input)
         if scale and scale >= 0.5 and scale <= 2 then
             db.scale = scale; frame:SetScale(scale); Position()
         else message(L.scaleUsage) end
-    else message(L.help .. " | blizzard hide | blizzard show") end
+    else message(L.help .. " | options | skin classic | skin modern | blizzard hide | blizzard show") end
     Refresh()
 end
 
@@ -326,6 +444,7 @@ events:SetScript("OnEvent", function(_, event, unit)
         if unit == addonName then
             TillNextLevelDB = type(TillNextLevelDB) == "table" and TillNextLevelDB or {}
             db = TillNextLevelDB
+            if db.skin ~= "classic" and db.skin ~= "modern" then db.skin = "modern" end
             if type(db.scale) ~= "number" or db.scale < 0.5 or db.scale > 2 then db.scale = 1 end
         end
         return
