@@ -4,6 +4,88 @@ local quests = { ready = 0, ongoing = 0, unknown = 0, rows = {} }
 local questDirty, questElapsed, elapsed = true, 0, 0
 local WHITE = "Interface\\Buttons\\WHITE8X8"
 local L = addon.L
+local message
+local blizzardBars = {}
+local function ApplyBlizzardVisibility()
+    if not db then return end
+    local function track(bar, eligible)
+        if (type(bar) ~= "table" and type(bar) ~= "userdata")
+            or type(bar.GetAlpha) ~= "function" or type(bar.SetAlpha) ~= "function" then return end
+        if db.hideBlizzardXP and eligible ~= false then
+            if not blizzardBars[bar] then
+                blizzardBars[bar] = { alpha = bar:GetAlpha() }
+            end
+            bar:SetAlpha(0)
+        elseif blizzardBars[bar] then
+            bar:SetAlpha(blizzardBars[bar].alpha)
+            blizzardBars[bar] = nil
+        end
+    end
+    track(MainMenuExpBar)
+    track(MainMenuXPBar)
+    track(ExperienceBar)
+    track(XPBar)
+    for _, name in ipairs({ "StatusTrackingBarManager", "MainStatusTrackingBarContainer", "SecondaryStatusTrackingBarContainer" }) do
+        local container = _G[name]
+        if container then
+            track(container.ExperienceBar)
+            track(container.ExpBar)
+            track(container.expBar)
+            track(container.experienceBar)
+            if type(container.GetBarFromTemplate) == "function" then
+                for _, template in ipairs({ "ExpBarTemplate", "ExpStatusBarTemplate" }) do
+                    local ok, bar = pcall(container.GetBarFromTemplate, container, template)
+                    if ok then track(bar) end
+                end
+            end
+            local experienceIndex = StatusTrackingBarInfo and StatusTrackingBarInfo.BarsEnum and StatusTrackingBarInfo.BarsEnum.Experience
+            local experienceType = Enum and Enum.StatusTrackingBarType and Enum.StatusTrackingBarType.Experience
+            if type(container.bars) == "table" then
+                if experienceIndex then track(container.bars[experienceIndex]) end
+                for _, bar in pairs(container.bars) do
+                    if type(bar.GetType) == "function" then
+                        local kind = bar:GetType()
+                        if (experienceType and kind == experienceType) or kind == "EXPERIENCE" then track(bar) end
+                    end
+                end
+            end
+            -- Classic/Forever stores anonymous bars by BarsEnum, not GetType.
+            -- Container artwork belongs to whichever bar is currently shown.
+            if experienceIndex then
+                local showingXP = container.shownBarIndex == experienceIndex
+                -- Forever adds frame artwork outside the XP child itself.
+                -- Hide its whole dedicated container only while it holds XP.
+                if name ~= "StatusTrackingBarManager" then track(container, showingXP) end
+                for _, field in ipairs({ "MainMenuBarTextures", "StandaloneTextures" }) do
+                    if type(container[field]) == "table" then
+                        for _, texture in ipairs(container[field]) do track(texture, showingXP) end
+                    end
+                end
+            end
+        end
+    end
+    if not db.hideBlizzardXP then
+        for bar, original in pairs(blizzardBars) do
+            bar:SetAlpha(original.alpha)
+            blizzardBars[bar] = nil
+        end
+    end
+end
+local function BlizzardDiagnostics()
+    for _, name in ipairs({ "MainMenuExpBar", "XPBar", "ExperienceBar", "StatusTrackingBarManager", "MainStatusTrackingBarContainer", "SecondaryStatusTrackingBarContainer" }) do
+        local object = _G[name]
+        if object then
+            message(name .. " alpha=" .. tostring(object:GetAlpha()) .. " index=" .. tostring(object.shownBarIndex))
+            if object.GetChildren then
+                for _, child in ipairs({ object:GetChildren() }) do
+                    local kind = child.GetType and child:GetType()
+                    message("  " .. tostring(child:GetName() or "anonymous") .. " type=" .. tostring(kind)
+                        .. " alpha=" .. tostring(child:GetAlpha()))
+                end
+            end
+        end
+    end
+end
 local function number(value)
     local s = tostring(math.floor(value + 0.5))
     local formatted = s:reverse():gsub("(%d%d%d)", "%1" .. addon.thousandsSeparator):reverse()
@@ -16,7 +98,7 @@ local function duration(seconds)
     if minutes < 60 then return string.format(L.minutes, minutes) end
     return string.format(L.hours, math.floor(minutes / 60), minutes % 60)
 end
-local function message(text)
+message = function(text)
     DEFAULT_CHAT_FRAME:AddMessage("|cff59cfffTill Next Level|r : " .. text)
 end
 
@@ -214,6 +296,13 @@ SlashCmdList.TILLNEXTLEVEL = function(input)
     if not db then return end
     local command, argument = input:lower():match("^%s*(%S*)%s*(.-)%s*$")
     if command == "reset" then ResetSession(); message(L.reset)
+    elseif command == "blizzard" then
+        if argument == "status" then BlizzardDiagnostics()
+        elseif argument == "hide" or argument == "show" then
+            db.hideBlizzardXP = argument == "hide"
+            ApplyBlizzardVisibility()
+            message("/tnl blizzard " .. argument)
+        else message("/tnl blizzard hide | show | status") end
     elseif command == "show" then db.hidden = false
     elseif command == "hide" then db.hidden = true
     elseif command == "lock" then db.locked = true; message(L.locked)
@@ -224,7 +313,7 @@ SlashCmdList.TILLNEXTLEVEL = function(input)
         if scale and scale >= 0.5 and scale <= 2 then
             db.scale = scale; frame:SetScale(scale); Position()
         else message(L.scaleUsage) end
-    else message(L.help) end
+    else message(L.help .. " | blizzard hide | blizzard show") end
     Refresh()
 end
 
@@ -242,7 +331,7 @@ events:SetScript("OnEvent", function(_, event, unit)
         return
     end
     if event == "PLAYER_LOGIN" then
-        ResetSession(); CreateBar(); ScanQuests(); questDirty = false; Refresh()
+        ResetSession(); CreateBar(); ScanQuests(); questDirty = false; Refresh(); ApplyBlizzardVisibility()
         return
     end
     if not frame then return end
@@ -259,5 +348,5 @@ events:SetScript("OnUpdate", function(_, delta)
         questDirty, questElapsed = false, 0
         ScanQuests(); Refresh()
     end
-    if elapsed >= 1 then elapsed = 0; Refresh() end
+    if elapsed >= 1 then elapsed = 0; Refresh(); ApplyBlizzardVisibility() end
 end)

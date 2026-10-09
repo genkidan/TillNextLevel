@@ -13,7 +13,7 @@
 ## Notes-zhTW: 經驗條、每小時經驗及任務經驗預估。
 ## Author: G3nkidan
 ## X-License: GPL-3.0-only
-## Version: 0.1.8
+## Version: 0.1.9
 ## SavedVariablesPerCharacter: TillNextLevelDB
 
 Localization.lua

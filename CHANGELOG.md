@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.9
+
+- Added `/tnl blizzard hide` and `/tnl blizzard show`, with a per-character saved preference.
+- Detect Classic/Forever's anonymous XP bars through `StatusTrackingBarInfo.BarsEnum.Experience`, alongside legacy frame names and compatible tracking APIs.
+- Make the XP bar and its dedicated container transparent, including the frame and separators. Restore original opacity when disabled or when the container switches to reputation; leave the tracking manager active.
+- Reapply at login and once per second without replacing Blizzard functions. Add `/tnl blizzard status` diagnostics and regression checks for hiding, restoring, and switching to reputation. Final appearance still requires in-game confirmation.
+
 ## 0.1.8
 
 - Use the current character's class color for the XP fill, with a blue fallback if the client does not provide class color data. Quest forecasts retain gold and bronze.

@@ -9,6 +9,8 @@ function Methods:GetCenter() return 500, 500 end
 function Methods:GetEffectiveScale() return 1 end
 function Methods:SetShown(value) self.shown = value end
 function Methods:IsOwned() return false end
+function Methods:GetAlpha() return self.alpha or 1 end
+function Methods:SetAlpha(value) self.alpha = value end
 local function widget()
     return setmetatable({ scripts = {}, events = {} }, { __index = function(_, key)
         return Methods[key] or function() end
@@ -57,6 +59,44 @@ local function fire(event, ...) events.scripts.OnEvent(events, event, ...) end
 fire("ADDON_LOADED", "TillNextLevel")
 fire("PLAYER_LOGIN")
 local frame = TillNextLevelFrame
+MainMenuExpBar = widget()
+MainMenuExpBar:SetAlpha(0.8)
+SlashCmdList.TILLNEXTLEVEL("blizzard hide")
+assert(TillNextLevelDB.hideBlizzardXP and MainMenuExpBar:GetAlpha() == 0)
+MainMenuExpBar:SetAlpha(1)
+events.scripts.OnUpdate(events, 1)
+assert(MainMenuExpBar:GetAlpha() == 0)
+SlashCmdList.TILLNEXTLEVEL("blizzard show")
+assert(not TillNextLevelDB.hideBlizzardXP and MainMenuExpBar:GetAlpha() == 0.8)
+local anonymousXP, reputation = widget(), widget()
+anonymousXP:SetAlpha(1)
+reputation:SetAlpha(1)
+function anonymousXP:GetType() return "EXPERIENCE" end
+function reputation:GetType() return "REPUTATION" end
+StatusTrackingBarManager = { bars = { anonymousXP, reputation } }
+SlashCmdList.TILLNEXTLEVEL("blizzard hide")
+assert(anonymousXP:GetAlpha() == 0 and reputation:GetAlpha() == 1)
+SlashCmdList.TILLNEXTLEVEL("blizzard show")
+assert(anonymousXP:GetAlpha() == 1)
+StatusTrackingBarManager = nil
+StatusTrackingBarInfo = { BarsEnum = { Experience = 4, Reputation = 1 } }
+local indexedXP, indexedRep, border = widget(), widget(), widget()
+indexedXP:SetAlpha(1); indexedRep:SetAlpha(1); border:SetAlpha(0.7)
+MainStatusTrackingBarContainer = widget()
+MainStatusTrackingBarContainer:SetAlpha(1)
+MainStatusTrackingBarContainer.bars = { [4] = indexedXP, [1] = indexedRep }
+MainStatusTrackingBarContainer.shownBarIndex = 4
+MainStatusTrackingBarContainer.MainMenuBarTextures = { border }
+SlashCmdList.TILLNEXTLEVEL("blizzard hide")
+assert(indexedXP:GetAlpha() == 0 and indexedRep:GetAlpha() == 1 and border:GetAlpha() == 0)
+assert(MainStatusTrackingBarContainer:GetAlpha() == 0)
+MainStatusTrackingBarContainer.shownBarIndex = 1
+events.scripts.OnUpdate(events, 1)
+assert(border:GetAlpha() == 0.7 and indexedRep:GetAlpha() == 1)
+assert(MainStatusTrackingBarContainer:GetAlpha() == 1)
+SlashCmdList.TILLNEXTLEVEL("blizzard show")
+assert(indexedXP:GetAlpha() == 1)
+MainStatusTrackingBarContainer, StatusTrackingBarInfo = nil, nil
 assert(frame.progress.text:find("800 / 1" .. addon.thousandsSeparator .. "000", 1, true))
 assert(frame.percent.text:find("80" .. addon.decimalSeparator .. "0%", 1, true))
 assert(frame.completed.text:find("150", 1, true))

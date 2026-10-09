@@ -1,6 +1,6 @@
 # Till Next Level
 
-**Version: 0.1.8**
+**Version: 0.1.9**
 
 Standalone addon for **WoW Forever 1.60.1 (Interface 16001)**, inspired by Luxthos XP bars. No WeakAuras dependency.
 
@@ -23,6 +23,8 @@ Install the `TillNextLevel` folder in `Interface/AddOns`, then restart the game 
 | --- | --- |
 | `/tnl` | Show available commands |
 | `/tnl show` / `/tnl hide` | Show / hide |
+| `/tnl blizzard hide` / `/tnl blizzard show` | Hide / restore the Blizzard XP bar; saved per character |
+| `/tnl blizzard status` | Report detected Blizzard tracking frames for troubleshooting |
 | `/tnl lock` / `/tnl unlock` | Lock / unlock the position |
 | `/tnl center` | Move the bar below the center of the screen |
 | `/tnl scale 1.2` | Set the scale between 0.5 and 2 |
